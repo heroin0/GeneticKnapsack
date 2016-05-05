@@ -49,6 +49,7 @@ namespace GAMultidimKnapsack
                 {
                     itemsSet[i, j] = rand.NextDouble();
                 }
+            //ololol
         }
     }
 

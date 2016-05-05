@@ -1,0 +1,6 @@
+c:\users\black_000\documents\visual studio 2015\Projects\GAMultidimKnapsack\GAMultidimKnapsack\bin\Debug\GAMultidimKnapsack.exe.config
+C:\Users\black_000\documents\visual studio 2015\Projects\GAMultidimKnapsack\GAMultidimKnapsack\bin\Debug\GAMultidimKnapsack.exe
+C:\Users\black_000\documents\visual studio 2015\Projects\GAMultidimKnapsack\GAMultidimKnapsack\bin\Debug\GAMultidimKnapsack.pdb
+C:\Users\black_000\documents\visual studio 2015\Projects\GAMultidimKnapsack\GAMultidimKnapsack\obj\Debug\GAMultidimKnapsack.csprojResolveAssemblyReference.cache
+C:\Users\black_000\documents\visual studio 2015\Projects\GAMultidimKnapsack\GAMultidimKnapsack\obj\Debug\GAMultidimKnapsack.exe
+C:\Users\black_000\documents\visual studio 2015\Projects\GAMultidimKnapsack\GAMultidimKnapsack\obj\Debug\GAMultidimKnapsack.pdb

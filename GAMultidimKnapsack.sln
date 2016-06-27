@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GAMultidimKnapsack", "GAMultidimKnapsack\GAMultidimKnapsack.csproj", "{0E18D346-CB48-4D74-8B0B-784DF80DDC53}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GAMultidimKnapsack", "GAMultidimKnapsack\GAMultidimKnapsack.csproj", "{A021AAD8-AE6E-415C-BB3A-1178BF9726CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0E18D346-CB48-4D74-8B0B-784DF80DDC53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0E18D346-CB48-4D74-8B0B-784DF80DDC53}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0E18D346-CB48-4D74-8B0B-784DF80DDC53}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0E18D346-CB48-4D74-8B0B-784DF80DDC53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A021AAD8-AE6E-415C-BB3A-1178BF9726CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A021AAD8-AE6E-415C-BB3A-1178BF9726CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A021AAD8-AE6E-415C-BB3A-1178BF9726CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A021AAD8-AE6E-415C-BB3A-1178BF9726CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

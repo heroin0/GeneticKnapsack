@@ -13,61 +13,96 @@ namespace GAMultidimKnapsack
 
     class KnapsackConfig
     {
-        int[] ActiveElements;
+        int[] CurrentConfiguration;
 
         public KnapsackConfig(int elementsAmount)
         {
-            ActiveElements = new int[elementsAmount];
+            CurrentConfiguration = new int[elementsAmount];
         }
 
         public KnapsackConfig(int[] initConfig)
         {
-            ActiveElements = initConfig;
+            CurrentConfiguration = initConfig;
         }
 
-        public void setValue(int position, int value)
+        public void setValueToActive(int position)
         {
-            ActiveElements[position] = value;
+            CurrentConfiguration[position] = 1;
+        }
+
+        public void setValueToPassive(int position)
+        {
+            CurrentConfiguration[position] = -1;
         }
 
         public void swapValue(int position)
         {
-            ActiveElements[position] = -ActiveElements[position];
+            CurrentConfiguration[position] = -CurrentConfiguration[position];
+        }
+
+        public bool isValueActive(int position)
+        {
+            return (CurrentConfiguration[position] > 0);
         }
 
         public int valueAt(int position)
         {
-            return ActiveElements[position];
+            return (CurrentConfiguration[position]);
         }
     }
 
+    
     class GeneticalAlgorithm
     {
-        uint itemsAmount, dimensions;
-        double[,] itemsSet;//amount of items*their dimensions
-        double[] restrictions;
+        private int itemsAmount, dimensions;
+        private double[,] itemsSet;//amount of items*their dimensions
+        private double[] restrictions;
 
-        uint configsAmount;
-        KnapsackConfig[] bestConfigs;
+        private uint configsInPoolAmount;
+        private KnapsackConfig[] bestConfigs;
 
+        private Crossing activeCrossing;
 
-        public GeneticalAlgorithm(uint itemsAm, uint dim, double[] rest, uint confAm)
+        public GeneticalAlgorithm(int itemsAm, int dim, double[] rest, uint confAm, Crossing myCrs)
         {
             itemsAmount = itemsAm;
             restrictions = rest;
             dimensions = dim;
             itemsSet = new double[itemsAm, dim];
+            configsInPoolAmount = confAm;
 
-            configsAmount = confAm;
-            //for (var i = 0; i < configsAmount; i++)
+            activeCrossing = myCrs;
+
+            var bestConfigsAmount = 10;
+            bestConfigs = new KnapsackConfig[bestConfigsAmount];
+         
         }
 
-        //KnapsackConfig FirstApproachGenerate()//TODO - Узнать, как это делается
-        //{
 
-        //}
+        KnapsackConfig FirstApproachGenerate()
+        {
+            KnapsackConfig result = new KnapsackConfig(itemsAmount);
 
-        KnapsackConfig Crossing(KnapsackConfig sack1, KnapsackConfig sack2)
+            for (var i = 0; i < itemsAmount; i++)
+            {
+                result.setValueToActive(i);
+            }
+            Random rand = new Random();
+            while (!IsValid(result))
+            {
+                int positionNumber = rand.Next(itemsAmount);
+                while (!result.isValueActive(positionNumber))
+                {
+                    positionNumber = rand.Next(itemsAmount);
+                }
+                result.setValueToPassive(positionNumber);
+            }
+            return result;
+        }
+
+        public delegate KnapsackConfig Crossing(KnapsackConfig sack1, KnapsackConfig sack2);
+
+        public KnapsackConfig Crossing1(KnapsackConfig sack1, KnapsackConfig sack2)
         {
             int[] crossItems = new int[itemsAmount];
             for (var i = 0; i < itemsAmount; i++)
@@ -80,6 +115,23 @@ namespace GAMultidimKnapsack
             KnapsackConfig crossingResult = new KnapsackConfig(crossItems);
 
             return crossingResult;
+        }
+
+        KnapsackConfig Mutate(KnapsackConfig sack)
+        {
+            Random rand = new Random();
+            KnapsackConfig mutatedSack = sack;//copy constructor
+            int mutationPosition = rand.Next(itemsAmount);
+            while (KnapsackConfig.Equals(mutatedSack, sack))
+            {
+                mutatedSack.swapValue(mutationPosition);
+                if (!IsValid(mutatedSack))
+                {
+                    mutatedSack.swapValue(mutationPosition);
+                    mutationPosition = rand.Next(itemsAmount);
+                }
+            }
+            return mutatedSack;
         }
 
         public bool IsValid(KnapsackConfig config)
@@ -102,14 +154,13 @@ namespace GAMultidimKnapsack
 
     }
 
-
-
     class Program
     {
         static void Main(string[] args)
         {
             double[] a = new double[] { 1.2, 2.5, 2.7 };
-            GeneticalAlgorithm GA = new GeneticalAlgorithm(4, 3, a, 8);
+            GeneticalAlgorithm GA = new GeneticalAlgorithm(4, 3, a, 8, );
+            //TODO - переделать так, чтобы было актуально использование делегатов.
         }
     }
 

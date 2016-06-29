@@ -54,7 +54,7 @@ namespace GAMultidimKnapsack
     
     class GeneticalAlgorithm
     {
-        private int itemsAmount, dimensions;
+        private static int itemsAmount, dimensions;
         private double[,] itemsSet;//amount of items*their dimensions
         private double[] restrictions;
 
@@ -102,7 +102,7 @@ namespace GAMultidimKnapsack
 
         public delegate KnapsackConfig Crossing(KnapsackConfig sack1, KnapsackConfig sack2);
 
-        public KnapsackConfig Crossing1(KnapsackConfig sack1, KnapsackConfig sack2)
+        public static KnapsackConfig Crossing1(KnapsackConfig sack1, KnapsackConfig sack2)
         {
             int[] crossItems = new int[itemsAmount];
             for (var i = 0; i < itemsAmount; i++)
@@ -159,7 +159,7 @@ namespace GAMultidimKnapsack
         static void Main(string[] args)
         {
             double[] a = new double[] { 1.2, 2.5, 2.7 };
-            GeneticalAlgorithm GA = new GeneticalAlgorithm(4, 3, a, 8, );
+            GeneticalAlgorithm GA = new GeneticalAlgorithm(4, 3, a, 8, GeneticalAlgorithm.Crossing1 );
             //TODO - переделать так, чтобы было актуально использование делегатов.
         }
     }

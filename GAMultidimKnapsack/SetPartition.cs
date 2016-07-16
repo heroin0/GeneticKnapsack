@@ -26,7 +26,7 @@ namespace SetPartition
 
     static class SetPartition //в этом классе мы создаём экземпляр алгоритма и крутим его.
     {
-        static Random rnd = new Random(42);
+        static Random rand = new Random(42);
         static Form form;
         static ConcurrentQueue<double> averageValuations = new ConcurrentQueue<double>();
         static ConcurrentQueue<double> maxValuations = new ConcurrentQueue<double>();
@@ -47,7 +47,7 @@ namespace SetPartition
                    // ga.MakeIteration();
                     averageValuations.Enqueue(watch.ElapsedMilliseconds/100);//здесь мы добавляем свои значения.
                     maxValuations.Enqueue(watch.ElapsedTicks/100000);
-                   // ages.Enqueue(rnd.NextDouble()*100);
+                   // ages.Enqueue(rand.NextDouble()*100);
 
                 }
                 watch.Stop();

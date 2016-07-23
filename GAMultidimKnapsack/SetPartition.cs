@@ -1,5 +1,6 @@
 ﻿//using AIRLab.GeneticAlgorithms;
 using Common;
+using GAMultidimKnapsack;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+
 
 namespace SetPartition
 {
@@ -38,17 +41,27 @@ namespace SetPartition
 
         static void Algorithm()
         {
+            double[] restrictions = new double[] { 34, 75, 99 }, costs=new double[100];
+            for (int i= 0;i<100;i++)
+            {
+                costs[i] = rand.NextDouble();
+            }
+            GeneticalAlgorithm ga = new GeneticalAlgorithm(100, 3, restrictions, costs, 8, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
+            int iterationNumber = 0;
             while (true)
             {
+                iterationNumber++;
                 var watch = new Stopwatch();
                 watch.Start();
+                
                 while (watch.ElapsedMilliseconds < 200)
                 {
-                   // ga.MakeIteration();
-                    averageValuations.Enqueue(watch.ElapsedMilliseconds/100);//здесь мы добавляем свои значения.
-                    maxValuations.Enqueue(watch.ElapsedTicks/100000);
-                   // ages.Enqueue(rand.NextDouble()*100);
-
+                    ga.MakeIteration();
+                    averageValuations.Enqueue(ga.GetAveragePoolCost());
+                    maxValuations.Enqueue(ga.GetMaximalKnapsackInPoolCost());
+                    //averageValuations.Enqueue(watch.ElapsedMilliseconds/100);//здесь мы добавляем свои значения.
+                    //maxValuations.Enqueue(watch.ElapsedTicks/100000);
+                    ages.Enqueue(rand.NextDouble()*100);
                 }
                 watch.Stop();
                 if (!form.IsDisposed)
@@ -62,8 +75,8 @@ namespace SetPartition
           
             maxValuations.Clear();
             averageValuations.Clear();
-           // agesChart.AddRange(ages);
-          //  ages.Clear();
+            agesChart.AddRange(ages);
+            ages.Clear();
         }
 
         
@@ -72,11 +85,11 @@ namespace SetPartition
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main2()
+        static void Main()
         {
             form = new Form();
             var table = new TableLayoutPanel() { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
-
+            
             valuationsChart = new HistoryChart
             {
                 Lines = 
@@ -87,15 +100,15 @@ namespace SetPartition
                 Max = 1,
                 Dock = DockStyle.Fill
             };
-            //agesChart = new HistoryChart
-            //{
-            //    Lines = { new HistoryChartValueLine { DataFunction = { Color = Color.Blue, BorderWidth=2 } } },
-            //    Dock = DockStyle.Fill,
-            //    Max=100
-            //};
+            agesChart = new HistoryChart
+            {
+                Lines = { new HistoryChartValueLine { DataFunction = { Color = Color.Blue, BorderWidth = 2 } } },
+                Dock = DockStyle.Fill,
+                Max = 100
+            };
 
             table.Controls.Add(valuationsChart,0,0);
-           // table.Controls.Add(agesChart,0,1);
+            table.Controls.Add(agesChart, 0, 1);
 
             for (int i = 0; i < 2; i++)
             {

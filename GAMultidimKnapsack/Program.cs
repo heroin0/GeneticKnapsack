@@ -4,10 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-
-
-
+using System.Windows.Forms;
 
 namespace GAMultidimKnapsack
 {
@@ -28,9 +25,17 @@ namespace GAMultidimKnapsack
 
         public KnapsackConfig(KnapsackConfig conf)
         {
-            this.CurrentConfiguration = new int[conf.Length()];
-            for (int i = 0; i < conf.Length(); i++)
-                this.CurrentConfiguration[i] = conf.valueAt(i);
+            try
+            {
+                this.CurrentConfiguration = new int[conf.Length()];
+                for (int i = 0; i < conf.Length(); i++)
+                    this.CurrentConfiguration[i] = conf.valueAt(i);
+            }
+            catch (NullReferenceException ex)
+            {
+                MessageBox.Show("Empty configuration", "Null Reference Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
         }
 
         public void setValueToActive(int position)
@@ -60,7 +65,15 @@ namespace GAMultidimKnapsack
 
         public int Length()
         {
-            return CurrentConfiguration.Length;
+            try
+            {
+                    return CurrentConfiguration.Length;
+            }
+            catch(NullReferenceException ex)
+            {
+                MessageBox.Show("Empty configuration", "Null Reference Exception", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return 0;
+            }
         }
 
         public bool Equals(KnapsackConfig sack)
@@ -73,8 +86,7 @@ namespace GAMultidimKnapsack
             }
             return true;
         }
-}
-
+    }
 
     class GeneticalAlgorithm
     {
@@ -84,9 +96,10 @@ namespace GAMultidimKnapsack
         private double[] itemsCosts;
 
         private uint configsInPoolAmount;
-
+        private int bestConfigsAmount;
+        private KnapsackConfig[] configsPool;
         private KnapsackConfig[] bestConfigs;
-
+        private double maximalKnapsackCost;
 
         private Crossing activeCrossing;
         private Mutation activeMutation;
@@ -98,7 +111,6 @@ namespace GAMultidimKnapsack
             restrictions = rest;
             dimensions = dim;
             itemsSet = new double[itemsAm, dim];
-            //only for basic tests
             rand = new Random(42);
             for (int i = 0; i < itemsAmount; i++)
                 for (int j = 0; j < dimensions; j++)
@@ -110,67 +122,75 @@ namespace GAMultidimKnapsack
             activeCrossing = myCrs;
             activeMutation = myMt;
 
+            bestConfigsAmount = 10;
+            int[] emptyConfig = (new int[itemsAmount]).Select(x => 0).ToArray();
+            bestConfigs = (new KnapsackConfig[bestConfigsAmount]).Select(x => new KnapsackConfig(emptyConfig)).ToArray();//HACK
+            configsPool = new KnapsackConfig[configsInPoolAmount];
+            maximalKnapsackCost = itemsCosts.Sum();
+
             StartCycling();
         }
 
         private void StartCycling()
         {
-
-            var bestConfigsAmount = 10;
-            var poolIterations = 100;
-            bestConfigs = new KnapsackConfig[bestConfigsAmount];
-
-            KnapsackConfig[] configsPool = new KnapsackConfig[configsInPoolAmount];
-            configsPool[0] = FirstApproachGenerate();
-
-            int active = 0, passive = 0;
-            for (int i = 0; i < itemsAmount; i++)
+            try
             {
-                if (configsPool[0].isValueActive(i))
-                    active++;
-                else passive++;
+                
+                configsPool[0] = FirstApproachGenerate();
+
+                int active = 0, passive = 0;
+                for (int i = 0; i < itemsAmount; i++)
+                {
+                    if (configsPool[0].isValueActive(i))
+                        active++;
+                    else passive++;
+                }
+                //TODO:Do sth in that case. Somehow stop the algo. Also, need to return the best of our active configs to the output
+                if (active == itemsAmount || passive == itemsAmount)
+                    return;
+
+
+                for (int i = 1; i < configsInPoolAmount; i++)
+                {
+                    configsPool[i] = activeMutation(configsPool[0], rand);
+                }
             }
-            //TODO:Do sth in that case:
-            if (active == itemsAmount || passive == itemsAmount)
+            catch (Exception ex)
+            {
+                MessageBox.Show("Bugs in initialization", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
-            
+            }
+        }
 
-            for (int i = 1; i < configsInPoolAmount; i++)
+        public void MakeIteration()
+        {
+            for (var j = 0; j < configsInPoolAmount / 2; j++)//TODO: add customization of amount
             {
-                configsPool[i] = activeMutation(configsPool[0],rand);
+                configsPool[j] = activeMutation(configsPool[j], rand);
             }
 
-            for (var i = 0; i < poolIterations; i++)
+            KnapsackConfig[] crossingPool = new KnapsackConfig[configsInPoolAmount * 2 - 2];//not very well, if i want to customize crossing ,but works
+            for (var j = 0; j < (configsInPoolAmount - 1); j++)
             {
-                KnapsackConfig[] crossingPool = new KnapsackConfig[configsInPoolAmount * 2 - 2];
-                for (var j = 0; j < (configsInPoolAmount - 1); j++)
-                {
-                    crossingPool[j] = activeCrossing(configsPool[j], configsPool[j + 1],true);
-                    crossingPool[(crossingPool.Length-1)-j]= activeCrossing(configsPool[j], configsPool[j + 1], false);
-                }
-                var tempConfigs = crossingPool.OrderBy(config => GetKnapsackCost(config))
-                    .Distinct()
-                    .Take(Convert.ToInt32(configsInPoolAmount))
-                    .ToArray();
-                //Эта жуткая строчка таки не работает
-                configsPool = tempConfigs;
-                double averagePoolCost = 0;
-                foreach (var config in configsPool)
-                {
-                    averagePoolCost += GetKnapsackCost(config);
-                }
-                averagePoolCost /= configsInPoolAmount;
-
-                ShowPool(GetKnapsackCost(configsPool[0]), averagePoolCost, i);
-                //TODO: add interaction with BestConfigs
-                for (var j = 0; j < configsInPoolAmount / 2; j++)
-                {
-                    configsPool[j] = activeMutation(configsPool[j], rand);
-                }
-                Console.WriteLine("test");
+                crossingPool[j] = activeCrossing(configsPool[j], configsPool[j + 1], true);
+                crossingPool[(crossingPool.Length - 1) - j] = activeCrossing(configsPool[j], configsPool[j + 1], false);
             }
+            var tempConfigs = crossingPool.OrderByDescending(config => GetKnapsackCost(config))
+                .Distinct()
+                .Take(Convert.ToInt32(configsInPoolAmount))
+                .ToArray();
+            configsPool = tempConfigs;
 
-
+            for(int i=0;i<bestConfigsAmount;i++)
+            {
+                if (GetKnapsackCost(bestConfigs[i])< GetKnapsackCost(configsPool[0]))
+                {
+                    for (int j = i; i < bestConfigsAmount && j<configsInPoolAmount; j++, i++)
+                        bestConfigs[i] = configsPool[j];
+                    break;
+                }
+            }
+           
         }
 
         KnapsackConfig FirstApproachGenerate()
@@ -194,20 +214,20 @@ namespace GAMultidimKnapsack
             return result;
         }
 
-        public delegate KnapsackConfig Crossing(KnapsackConfig sack1, KnapsackConfig sack2,bool isLeft);
+        public delegate KnapsackConfig Crossing(KnapsackConfig sack1, KnapsackConfig sack2, bool isLeft);
 
         public static KnapsackConfig Crossing1(KnapsackConfig sack1, KnapsackConfig sack2, bool isLeft)
         {
             int[] crossItems = new int[itemsAmount];
             if (isLeft)
             {
-                    for (var i = 0; i < itemsAmount; i++)
-                    {
-                        if (i < (itemsAmount / 2))
-                            crossItems[i] = sack2.valueAt(i);
-                        else
-                            crossItems[i] = sack1.valueAt(i);
-                    }  
+                for (var i = 0; i < itemsAmount; i++)
+                {
+                    if (i < (itemsAmount / 2))
+                        crossItems[i] = sack2.valueAt(i);
+                    else
+                        crossItems[i] = sack1.valueAt(i);
+                }
             }
             else
             {
@@ -219,7 +239,7 @@ namespace GAMultidimKnapsack
                         crossItems[i] = sack2.valueAt(i);
                 }
             }
-        
+
             KnapsackConfig crossingResult = new KnapsackConfig(crossItems);
 
             return crossingResult;
@@ -227,9 +247,9 @@ namespace GAMultidimKnapsack
 
         public delegate KnapsackConfig Mutation(KnapsackConfig sack, Random rand);
 
-        public static KnapsackConfig Mutate1(KnapsackConfig sack,Random rand)
+        public static KnapsackConfig Mutate1(KnapsackConfig sack, Random rand)
         {
-            KnapsackConfig mutatedSack=new KnapsackConfig(sack);//copy constructor
+            KnapsackConfig mutatedSack = new KnapsackConfig(sack);//copy constructor
             int mutationPosition = rand.Next(itemsAmount);
             var count = 0;
             while (mutatedSack.Equals(sack) && count < 100)
@@ -272,24 +292,38 @@ namespace GAMultidimKnapsack
             for (int i = 0; i < itemsAmount; i++)
                 if (sack.isValueActive(i))
                     count += itemsCosts[i];
-            return count;
+            double result = count / maximalKnapsackCost;
+            return result;
         }
 
-        private void ShowPool(double bestValue, double averageValue, int iteration)
+ 
+
+        public double GetMaximalKnapsackInPoolCost()
         {
-            Console.WriteLine(iteration + ") " + bestValue.ToString() + averageValue.ToString());
+            return GetKnapsackCost(configsPool[0]);
+        }
+
+        public double GetAveragePoolCost()
+        {
+            double averagePoolCost = 0;
+            foreach (var config in configsPool)
+            {
+                averagePoolCost += GetKnapsackCost(config);
+            }
+            averagePoolCost /= configsInPoolAmount;
+            return averagePoolCost;
         }
     }
 
     class Program
     {
-        static void Main(string[] args)
+        static void Main2(string[] args)
         {
-            double[] restrictions = new double[] { 1.5, 1.2, 2.7 }, costs = { 0.5, 0.4, 0.7 ,1.1};
+            double[] restrictions = new double[] { 1.5, 1.2, 2.7 }, costs = { 0.5, 0.4, 0.7, 1.1 };
 
             GeneticalAlgorithm GA = new GeneticalAlgorithm(4, 3, restrictions, costs, 8, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
             Console.WriteLine("//TODO - переделать так, чтобы было актуально использование делегатов.");
-            //TODO - переделать так, чтобы было актуально использование делегатов.
+            
         }
     }
 

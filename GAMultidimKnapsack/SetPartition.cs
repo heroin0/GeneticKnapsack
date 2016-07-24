@@ -116,7 +116,7 @@ namespace SetPartition
             }
             
             form.Controls.Add(table);
-            form.WindowState = FormWindowState.Maximized;
+            //form.WindowState = FormWindowState.Maximized;
 
             new Thread(Algorithm) { IsBackground = true }.Start();
             Application.Run(form);

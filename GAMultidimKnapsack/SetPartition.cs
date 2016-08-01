@@ -41,12 +41,13 @@ namespace SetPartition
 
         static void Algorithm()
         {
-            double[] restrictions = new double[] { 34, 75, 99 }, costs=new double[100];
-            for (int i= 0;i<100;i++)
+            int itemsAmount = 1000;
+            double[] restrictions = new double[] { 34, 75, 99 ,54,63}, costs=new double[itemsAmount];
+            for (int i= 0;i< itemsAmount; i++)
             {
                 costs[i] = rand.NextDouble();
             }
-            GeneticalAlgorithm ga = new GeneticalAlgorithm(100, 3, restrictions, costs, 8, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
+            GeneticalAlgorithm ga = new GeneticalAlgorithm(itemsAmount, 5, restrictions, costs, 8, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
             int iterationNumber = 0;
             while (true)
             {

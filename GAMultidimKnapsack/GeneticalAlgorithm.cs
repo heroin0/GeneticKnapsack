@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace GAMultidimKnapsack
 {
@@ -177,9 +178,6 @@ namespace GAMultidimKnapsack
                 {
                     mutatedSack.swapValue(mutationPosition);
                     mutationPosition = rand.Next(itemsAmount);
-                }
-                else
-                {
                     count++;
                 }
             }

@@ -42,7 +42,7 @@ namespace SetPartition
         static void Algorithm()
         {
             int itemsAmount = 1000;
-            double[] restrictions = new double[] { 34, 75, 99 ,54,63}, costs=new double[itemsAmount];
+            double[] restrictions = new double[] { 340, 750, 990 ,540,630}, costs=new double[itemsAmount];
             for (int i= 0;i< itemsAmount; i++)
             {
                 costs[i] = rand.NextDouble();
@@ -60,8 +60,6 @@ namespace SetPartition
                     ga.MakeIteration();
                     averageValuations.Enqueue(ga.GetAveragePoolCost());
                     maxValuations.Enqueue(ga.GetMaximalKnapsackInPoolCost());
-                    //averageValuations.Enqueue(watch.ElapsedMilliseconds/100);//здесь мы добавляем свои значения.
-                    //maxValuations.Enqueue(watch.ElapsedTicks/100000);
                     ages.Enqueue(rand.NextDouble()*100);
                 }
                 watch.Stop();

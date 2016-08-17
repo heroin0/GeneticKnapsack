@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,82 +40,13 @@ namespace SetPartition
         static HistoryChart agesChart = new HistoryChart();
 
 
-        static void Algorithm(string file)
+        static void Algorithm(int itemsAmount, int dimensions, double maxCost, double[] restrictions, double[] costs, double[,] itemsSet)
         {
-            /*int itemsAmount = 10, dimensions = 6;
-            double[] restrictions = new double[] { 100, 600, 1200, 2400, 500, 2000 }, costs = new double[] { 80, 96, 20, 36, 44, 48, 10, 18, 22, 24, };
-            double[,] itemsSet = new double[itemsAmount, dimensions];
-            for (int i = 0; i < itemsAmount; i++)
-                for (int j = 0; j < dimensions; j++)
-                    itemsSet[i, j] = rand.NextDouble();
-            uint ConfigsAmount = 8;*/
-            string[] lines = System.IO.File.ReadAllLines(@"C:\Users\black_000\Source\Repos\GeneticKnapsack\GAMultidimKnapsack\1.txt");
-            int experimentsAmount = Convert.ToInt32(lines[0]);
-            int startingString = 2;
-            for (int experiment = 0; experiment < experimentsAmount; experiment++)
-            {
-                string[] initializationSequence = lines[startingString].Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                int itemsAmount = Convert.ToInt32(initializationSequence[0]),
-                    dimensions = Convert.ToInt32(initializationSequence[1]);
-                double maxCost = Convert.ToDouble(initializationSequence[2]);
-
-                double[] costs = lines[startingString + 1]
-                    .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x => Convert.ToDouble(x))
-                    .ToArray(),
-                    restrictions = lines[startingString  + 2 + dimensions]
-                    .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x => Convert.ToDouble(x))
-                    .ToArray();
-                double[,] itemsSet = new double[itemsAmount, dimensions];
-                for (int i = 0; i < dimensions ; i++)
-                {
-                    double[] currentString = lines[startingString + 2 + i].Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).Select(x => Convert.ToDouble(x)).ToArray();
-                    for (int j = 0; j < itemsAmount; j++)
-                        itemsSet[j, i] = currentString[j];
-                }
-                uint ConfigsAmount = 8;
-                GeneticalAlgorithm ga = new GeneticalAlgorithm(itemsAmount, dimensions, restrictions, costs, itemsSet, ConfigsAmount, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
-
-                int iterationNumber = 0;
-                while (ga.GetAbsoluteMaximalKnapsackCost()!=maxCost)
-                {
-                    
-                    var watch = new Stopwatch();
-                    watch.Start();
-
-                    while (watch.ElapsedMilliseconds < 200)
-                    {
-                        ga.MakeIteration();
-                        iterationNumber++;
-                        averageValuations.Enqueue(ga.GetNormaizedAveragePoolCost());
-                        maxValuations.Enqueue(ga.GetNormalizedMaximalKnapsackCost());
-                        ages.Enqueue(rand.NextDouble() * 100);
-                    }
-                    watch.Stop();
-                    if (!form.IsDisposed)
-                        form.BeginInvoke(new Action(UpdateCharts));
-                }
-                //TODO:Clear some stuff here - ages and values.
-     //           UpdateCharts();
-                Thread.Sleep(3000);
-                startingString += 4 + dimensions;
-            }
-        }
-
-        static void Algorithm()//Proof of concept
-        {
-            int itemsAmount = 10, dimensions = 6;
-            double[] restrictions = new double[] { 100, 600, 1200, 2400, 500, 2000 }, costs = new double[] { 80, 96, 20, 36, 44, 48, 10, 18, 22, 24, };
-            double[,] itemsSet = new double[itemsAmount, dimensions];
-            for (int i = 0; i < itemsAmount; i++)
-                for (int j = 0; j < dimensions; j++)
-                    itemsSet[i, j] = rand.NextDouble();
             uint ConfigsAmount = 8;
             GeneticalAlgorithm ga = new GeneticalAlgorithm(itemsAmount, dimensions, restrictions, costs, itemsSet, ConfigsAmount, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
 
             int iterationNumber = 0;
-            while (true)
+            while (ga.GetAbsoluteMaximalKnapsackCost() != maxCost)
             {
 
                 var watch = new Stopwatch();
@@ -131,12 +63,79 @@ namespace SetPartition
                 watch.Stop();
                 if (!form.IsDisposed)
                     form.BeginInvoke(new Action(UpdateCharts));
+
+                //TODO:Clear some stuff here - ages and values.
+                //UpdateCharts();
             }
         }
 
-        static void TestSet()
+        static void Algorithm()//Proof of concept
         {
+            int itemsAmount = 10, dimensions = 6;
+            double[] restrictions = new double[] { 100, 600, 1200, 2400, 500, 2000 }, costs = new double[] { 80, 96, 20, 36, 44, 48, 10, 18, 22, 24, };
+            double[,] itemsSet = new double[itemsAmount, dimensions];
+            for (int i = 0; i < itemsAmount; i++)
+                for (int j = 0; j < dimensions; j++)
+                    itemsSet[i, j] = rand.NextDouble() * 100;
+            uint ConfigsAmount = 8;
+            GeneticalAlgorithm ga = new GeneticalAlgorithm(itemsAmount, dimensions, restrictions, costs, itemsSet, ConfigsAmount, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
 
+            int iterationNumber = 0;
+            while (true)
+            {
+
+                var watch = new Stopwatch();
+                watch.Start();
+
+                while (watch.ElapsedMilliseconds < 200)
+                {
+                    ga.MakeIteration();
+                    iterationNumber++;
+                    averageValuations.Enqueue(ga.GetNormaizedAveragePoolCost());
+                    maxValuations.Enqueue(ga.GetNormalizedMaximalKnapsackCost());
+                    //ages.Enqueue(rand.NextDouble() * 100);
+                }
+                watch.Stop();
+                if (!form.IsDisposed)
+                    form.BeginInvoke(new Action(UpdateCharts));
+            }
+        }
+
+        static void TestSet(string file)
+        {
+            using (StreamReader sr = new StreamReader(file))
+            {
+                int experimentsAmount = Convert.ToInt32(sr.ReadLine());
+
+                for (int experiment = 0; experiment < experimentsAmount; experiment++)
+                {
+                    sr.ReadLine();
+                    string[] initializationSequence = sr.ReadLine().Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    int itemsAmount = Convert.ToInt32(initializationSequence[0]),
+                        dimensions = Convert.ToInt32(initializationSequence[1]);
+                    double maxCost = Convert.ToDouble(initializationSequence[2]);
+                    double[] costs = sr.ReadLine()
+                    .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => Convert.ToDouble(x))
+                    .ToArray();
+                    double[,] itemsSet = new double[itemsAmount, dimensions];
+                    for (int i = 0; i < dimensions; i++)
+                    {
+                        double[] currentString = sr.ReadLine()
+                            .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).
+                            Select(x => Convert.ToDouble(x)).
+                            ToArray();
+                        for (int j = 0; j < itemsAmount; j++)
+                            itemsSet[j, i] = currentString[j];
+                    }
+                    double[] restrictions = restrictions = sr.ReadLine()
+                    .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => Convert.ToDouble(x))
+                    .ToArray();
+                    Algorithm(itemsAmount, dimensions, maxCost, restrictions, costs, itemsSet);
+                    Thread.Sleep(3000);
+                }
+            }
         }
 
         static void UpdateCharts()
@@ -145,13 +144,9 @@ namespace SetPartition
 
             maxValuations.Clear();
             averageValuations.Clear();
-            agesChart.AddRange(ages);
-            ages.Clear();
+            //agesChart.AddRange(ages);
+            //ages.Clear();
         }
-
-
-
-
 
         /// <summary>
         /// The main entry point for the application.
@@ -172,25 +167,26 @@ namespace SetPartition
                 Max = 1,
                 Dock = DockStyle.Fill
             };
-            agesChart = new HistoryChart
-            {
-                Lines = { new HistoryChartValueLine { DataFunction = { Color = Color.Blue, BorderWidth = 2 } } },
-                Dock = DockStyle.Fill,
-                Max = 100
-            };
+            //agesChart = new HistoryChart
+            //{
+            //    Lines = { new HistoryChartValueLine { DataFunction = { Color = Color.Blue, BorderWidth = 2 } } },
+            //    Dock = DockStyle.Fill,
+            //    Max = 100
+            //};
 
             table.Controls.Add(valuationsChart, 0, 0);
-            table.Controls.Add(agesChart, 0, 1);
+            //table.Controls.Add(agesChart, 0, 1);
 
-            for (int i = 0; i < 2; i++)
-            {
-                table.RowStyles.Add(new RowStyle { SizeType = SizeType.Percent, Height = 50 });
-            }
+            //for (int i = 0; i < 2; i++)
+            //{
+            table.RowStyles.Add(new RowStyle { SizeType = SizeType.Percent, Height = 50 });
+            //}
 
             form.Controls.Add(table);
             //form.WindowState = FormWindowState.Maximized;
 
-            new Thread(Algorithm) { IsBackground = true }.Start();
+            // new Thread(Algorithm) { IsBackground = true }.Start();
+            new Thread(() => TestSet(@"C:\Users\black_000\Source\Repos\GeneticKnapsack\GAMultidimKnapsack\1.txt")) { IsBackground = true }.Start();
             Application.Run(form);
 
         }

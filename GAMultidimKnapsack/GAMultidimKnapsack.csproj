@@ -83,6 +83,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="1.txt" />
+    <Content Include="1_1.txt" />
+    <Content Include="mknap2.txt" />
     <Content Include="Алгоритм решения.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

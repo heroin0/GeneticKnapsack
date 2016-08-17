@@ -24,17 +24,15 @@ namespace GAMultidimKnapsack
         private Mutation activeMutation;
         private Random rand;
 
-        public GeneticalAlgorithm(int itemsAm, int dim, double[] rest, double[] costs, uint confAm, Crossing myCrs, Mutation myMt)
+        public GeneticalAlgorithm(int itemsAm, int dim, double[] rest, double[] costs, double[,] myItemsSet, uint confAm,  Crossing myCrs, Mutation myMt)
         {
             itemsAmount = itemsAm;
             restrictions = rest;
             dimensions = dim;
             itemsSet = new double[itemsAm, dim];
             rand = new Random(42);
-            for (int i = 0; i < itemsAmount; i++)
-                for (int j = 0; j < dimensions; j++)
-                    itemsSet[i, j] = rand.NextDouble();
-
+            
+            itemsSet = myItemsSet;
             itemsCosts = costs;
             configsInPoolAmount = confAm;
 
@@ -83,6 +81,7 @@ namespace GAMultidimKnapsack
 
         public void MakeIteration()
         {
+            if (GetKnapsackCost(configsPool[0]) == maximalKnapsackCost) return;
             for (var j = 0; j < configsInPoolAmount / 2; j++)//TODO: add customization of amount
             {
                 configsPool[j] = activeMutation(configsPool[j], rand);
@@ -171,7 +170,7 @@ namespace GAMultidimKnapsack
             KnapsackConfig mutatedSack = new KnapsackConfig(sack);//copy constructor
             int mutationPosition = rand.Next(itemsAmount);
             var count = 0;
-            while (mutatedSack.Equals(sack) && count < 100)
+            while (mutatedSack.Equals(sack) && count < 100)//TODO - not mutate empty sack
             {
                 mutatedSack.swapValue(mutationPosition);
                 if (!IsValid(mutatedSack))
@@ -208,26 +207,32 @@ namespace GAMultidimKnapsack
             for (int i = 0; i < itemsAmount; i++)
                 if (sack.isValueActive(i))
                     count += itemsCosts[i];
-            double result = count / maximalKnapsackCost;
-            return result;
+            
+            return count;
         }
 
 
 
-        public double GetMaximalKnapsackInPoolCost()
+        public double GetNormalizedMaximalKnapsackCost()
         {
-            return GetKnapsackCost(configsPool[0]);
+            return GetKnapsackCost(configsPool[0])/maximalKnapsackCost;
         }
 
-        public double GetAveragePoolCost()
+        public double GetNormaizedAveragePoolCost()
         {
-            double averagePoolCost = 0;
+            if (GetKnapsackCost(configsPool[0]) == maximalKnapsackCost) return GetKnapsackCost(configsPool[0]);
+                double averagePoolCost = 0;
             foreach (var config in configsPool)
             {
                 averagePoolCost += GetKnapsackCost(config);
             }
             averagePoolCost /= configsInPoolAmount;
-            return averagePoolCost;
+            return averagePoolCost/maximalKnapsackCost;
+        }
+
+        public double GetAbsoluteMaximalKnapsackCost()
+        {
+            return GetKnapsackCost(configsPool[0]);
         }
     }
 }

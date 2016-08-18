@@ -42,8 +42,8 @@ namespace SetPartition
 
         static void Algorithm(int itemsAmount, int dimensions, double maxCost, double[] restrictions, double[] costs, double[,] itemsSet)
         {
-            uint ConfigsAmount = 8;
-            GeneticalAlgorithm ga = new GeneticalAlgorithm(itemsAmount, dimensions, restrictions, costs, itemsSet, ConfigsAmount, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
+            int ConfigsAmount = 8;
+            GeneticalAlgorithm ga = new GeneticalAlgorithm(itemsAmount, dimensions, restrictions, costs, itemsSet, ConfigsAmount, GeneticalAlgorithm.SinglePointCrossing, GeneticalAlgorithm.SinglePointMutation);
 
             int iterationNumber = 0;
             while (ga.GetAbsoluteMaximalKnapsackCost() != maxCost)
@@ -52,7 +52,7 @@ namespace SetPartition
                 var watch = new Stopwatch();
                 watch.Start();
 
-                while (watch.ElapsedMilliseconds < 200)
+                while (watch.ElapsedMilliseconds < 1)
                 {
                     ga.MakeIteration();
                     iterationNumber++;
@@ -77,8 +77,8 @@ namespace SetPartition
             for (int i = 0; i < itemsAmount; i++)
                 for (int j = 0; j < dimensions; j++)
                     itemsSet[i, j] = rand.NextDouble() * 100;
-            uint ConfigsAmount = 8;
-            GeneticalAlgorithm ga = new GeneticalAlgorithm(itemsAmount, dimensions, restrictions, costs, itemsSet, ConfigsAmount, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
+            int ConfigsAmount = 8;
+            GeneticalAlgorithm ga = new GeneticalAlgorithm(itemsAmount, dimensions, restrictions, costs, itemsSet, ConfigsAmount, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.SinglePointMutation);
 
             int iterationNumber = 0;
             while (true)
@@ -133,7 +133,10 @@ namespace SetPartition
                     .Select(x => Convert.ToDouble(x))
                     .ToArray();
                     Algorithm(itemsAmount, dimensions, maxCost, restrictions, costs, itemsSet);
+                    
                     Thread.Sleep(3000);
+                    maxValuations.Enqueue(0);
+                    averageValuations.Enqueue(0);
                 }
             }
         }

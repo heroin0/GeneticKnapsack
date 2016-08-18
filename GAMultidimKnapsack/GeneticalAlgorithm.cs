@@ -14,7 +14,7 @@ namespace GAMultidimKnapsack
         private static double[] restrictions;
         private double[] itemsCosts;
 
-        private uint configsInPoolAmount;
+        private int configsInPoolAmount;
         private int bestConfigsAmount;
         private KnapsackConfig[] configsPool;
         private KnapsackConfig[] bestConfigs;
@@ -22,9 +22,9 @@ namespace GAMultidimKnapsack
 
         private Crossing activeCrossing;
         private Mutation activeMutation;
-        private Random rand;
+        private static Random rand;
 
-        public GeneticalAlgorithm(int itemsAm, int dim, double[] rest, double[] costs, double[,] myItemsSet, uint confAm,  Crossing myCrs, Mutation myMt)
+        public GeneticalAlgorithm(int itemsAm, int dim, double[] rest, double[] costs, double[,] myItemsSet, int confAm,  Crossing myCrs, Mutation myMt)
         {
             itemsAmount = itemsAm;
             restrictions = rest;
@@ -82,10 +82,21 @@ namespace GAMultidimKnapsack
         public void MakeIteration()
         {
             if (GetKnapsackCost(configsPool[0]) == maximalKnapsackCost) return;
-            for (var j = 0; j < configsInPoolAmount / 2; j++)//TODO: add customization of amount
+            //for (var j = 0; j < configsInPoolAmount/2; j++)//TODO: add customization of amount
+            //{
+            //    configsPool[j] = activeMutation(configsPool[j], rand);
+            //}
+            List<int> positions=new List<int>();
+            while(positions.Count< 3*configsInPoolAmount / 4)
             {
-                configsPool[j] = activeMutation(configsPool[j], rand);
+                positions.Add(rand.Next(configsInPoolAmount));
+                positions.Distinct();
             }
+            foreach(var pos in positions)
+            {
+                configsPool[pos]= activeMutation(configsPool[pos], rand);
+            }
+
 
             KnapsackConfig[] crossingPool = new KnapsackConfig[configsInPoolAmount * 2 - 2];//not very well, if i want to customize crossing ,but works
             for (var j = 0; j < (configsInPoolAmount - 1); j++)
@@ -163,14 +174,72 @@ namespace GAMultidimKnapsack
             return crossingResult;
         }
 
+        public static KnapsackConfig SinglePointCrossing(KnapsackConfig sack1, KnapsackConfig sack2, bool isLeft)
+        {
+            int[] crossItems = new int[itemsAmount];
+            int crossingPoint = rand.Next(itemsAmount);
+            if (isLeft)
+            {
+                for (var i = 0; i < itemsAmount; i++)
+                {
+                    if (i < crossingPoint)
+                        crossItems[i] = sack2.valueAt(i);
+                    else
+                        crossItems[i] = sack1.valueAt(i);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < itemsAmount; i++)
+                {
+                    if (i < crossingPoint)
+                        crossItems[i] = sack1.valueAt(i);
+                    else
+                        crossItems[i] = sack2.valueAt(i);
+                }
+            }
+
+            KnapsackConfig crossingResult = new KnapsackConfig(crossItems);
+            return crossingResult;
+        }
+
+        public static KnapsackConfig BitByBitCrossing(KnapsackConfig sack1, KnapsackConfig sack2, bool isLeft)
+        {
+            int[] crossItems = new int[itemsAmount];
+            if (isLeft)
+            {
+                for (var i = 0; i < itemsAmount; i++)
+                {
+                    if (i % 2==0)
+                        crossItems[i] = sack2.valueAt(i);
+                    else
+                        crossItems[i] = sack1.valueAt(i);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < itemsAmount; i++)
+                {
+                    if (i % 2 == 0)
+                        crossItems[i] = sack1.valueAt(i);
+                    else
+                        crossItems[i] = sack2.valueAt(i);
+                }
+            }
+
+            KnapsackConfig crossingResult = new KnapsackConfig(crossItems);
+
+            return crossingResult;
+        }
+
         public delegate KnapsackConfig Mutation(KnapsackConfig sack, Random rand);
 
-        public static KnapsackConfig Mutate1(KnapsackConfig sack, Random rand)
+        public static KnapsackConfig SinglePointMutation(KnapsackConfig sack, Random rand)
         {
             KnapsackConfig mutatedSack = new KnapsackConfig(sack);//copy constructor
             int mutationPosition = rand.Next(itemsAmount);
             var count = 0;
-            while (mutatedSack.Equals(sack) && count < 100)//TODO - not mutate empty sack
+            while (mutatedSack.Equals(sack) && count < 1000000)//TODO - not mutate empty sack
             {
                 mutatedSack.swapValue(mutationPosition);
                 if (!IsValid(mutatedSack))
@@ -178,9 +247,44 @@ namespace GAMultidimKnapsack
                     mutatedSack.swapValue(mutationPosition);
                     mutationPosition = rand.Next(itemsAmount);
                     count++;
-                }
+                }   
+            }
+            while (!IsValid(mutatedSack)&&count == 1000000)//emergensy
+            {
+                mutatedSack.setValueToPassive(mutationPosition);
+                mutationPosition = rand.Next(itemsAmount);
             }
             return mutatedSack;
+        }
+
+        public static KnapsackConfig MutateHalf(KnapsackConfig sack, Random rand)
+        {
+            KnapsackConfig mutatedSack = new KnapsackConfig(sack);
+            int mutationPosition=rand.Next(itemsAmount);
+            if (rand.Next()%2==0)
+            {
+                for(var i=0;i< itemsAmount / 2;i++)
+                {
+                    mutatedSack.swapValue(i);
+                }
+               // mutationPosition = 0;
+            }
+            else
+            {
+                for (var i = itemsAmount/2; i < itemsAmount; i++)
+                {
+                    mutatedSack.swapValue(i);
+                }
+                //mutationPosition = itemsAmount / 2;
+            }
+            while (!IsValid(mutatedSack))
+            {
+                mutatedSack.setValueToPassive(mutationPosition);
+                mutationPosition++;
+                if (mutationPosition == itemsAmount)
+                    mutationPosition = 0;
+            }
+            return (mutatedSack);
         }
 
         private static bool IsValid(KnapsackConfig config)

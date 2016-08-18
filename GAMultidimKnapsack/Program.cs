@@ -18,7 +18,7 @@ namespace GAMultidimKnapsack
         {
             double[] restrictions = new double[] { 1.5, 1.2, 2.7 }, costs = { 0.5, 0.4, 0.7, 1.1 };
 
-           // GeneticalAlgorithm GA = new GeneticalAlgorithm(4, 3, restrictions, costs, 8, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.Mutate1);
+           // GeneticalAlgorithm GA = new GeneticalAlgorithm(4, 3, restrictions, costs, 8, GeneticalAlgorithm.Crossing1, GeneticalAlgorithm.SinglePointMutation);
             Console.WriteLine("//TODO - переделать так, чтобы было актуально использование делегатов.");
             
         }

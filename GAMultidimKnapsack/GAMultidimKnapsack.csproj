@@ -84,7 +84,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="1.txt" />
-    <Content Include="mknap2.txt" />
+    <Content Include="2.txt" />
+    <Content Include="3.txt" />
     <Content Include="Алгоритм решения.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

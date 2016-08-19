@@ -101,7 +101,7 @@ namespace SetPartition
             }
         }
 
-        static void TestSet(string file)
+        static void ProcessTestSet(string file)
         {
             using (StreamReader sr = new StreamReader(file))
             {
@@ -109,31 +109,49 @@ namespace SetPartition
 
                 for (int experiment = 0; experiment < experimentsAmount; experiment++)
                 {
-                    sr.ReadLine();
-                    string[] initializationSequence = sr.ReadLine().Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    string[] initializationSequence;
+                    string firstString = sr.ReadLine();
+                    if (firstString.Trim() == "")
+                        initializationSequence = sr.ReadLine().Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    else initializationSequence = firstString.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries); ;
                     int itemsAmount = Convert.ToInt32(initializationSequence[0]),
-                        dimensions = Convert.ToInt32(initializationSequence[1]);
+                    dimensions = Convert.ToInt32(initializationSequence[1]);
                     double maxCost = Convert.ToDouble(initializationSequence[2]);
-                    double[] costs = sr.ReadLine()
-                    .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x => Convert.ToDouble(x))
-                    .ToArray();
+                    
+                    List<double> tempCosts = new List<double>();
+                    while (tempCosts.Count() != itemsAmount)
+                        tempCosts.AddRange(sr
+                            .ReadLine()
+                            .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                            .Select(x => Convert.ToDouble(x))
+                            .ToList());
+                    double[] costs = tempCosts.ToArray();
+
                     double[,] itemsSet = new double[itemsAmount, dimensions];
                     for (int i = 0; i < dimensions; i++)
                     {
-                        double[] currentString = sr.ReadLine()
-                            .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).
-                            Select(x => Convert.ToDouble(x)).
-                            ToArray();
-                        for (int j = 0; j < itemsAmount; j++)
-                            itemsSet[j, i] = currentString[j];
+                        int itemsReaden = 0;
+                        while (itemsReaden != itemsAmount)
+                        {
+                            double[] currentString = sr.ReadLine()
+                                .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries).
+                                Select(x => Convert.ToDouble(x)).
+                                ToArray();
+                            for (int j = itemsReaden, k=0; j < currentString.Count()+itemsReaden; j++, k++)
+                                itemsSet[j, i] = currentString[k];
+                            itemsReaden += currentString.Count();
+                        }
                     }
-                    double[] restrictions = restrictions = sr.ReadLine()
-                    .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x => Convert.ToDouble(x))
-                    .ToArray();
+                    List<double> tempRestrictions = new List<double>();
+                    while (tempRestrictions.Count() != dimensions)
+                        tempRestrictions.AddRange(sr
+                            .ReadLine()
+                            .Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)
+                            .Select(x => Convert.ToDouble(x))
+                            .ToList());
+                    double[] restrictions = tempRestrictions.ToArray();
                     Algorithm(itemsAmount, dimensions, maxCost, restrictions, costs, itemsSet);
-                    
+
                     Thread.Sleep(3000);
                     maxValuations.Enqueue(0);
                     averageValuations.Enqueue(0);
@@ -189,7 +207,7 @@ namespace SetPartition
             //form.WindowState = FormWindowState.Maximized;
 
             // new Thread(Algorithm) { IsBackground = true }.Start();
-            new Thread(() => TestSet(@"C:\Users\black_000\Source\Repos\GeneticKnapsack\GAMultidimKnapsack\1.txt")) { IsBackground = true }.Start();
+            new Thread(() => ProcessTestSet(@"C:\Users\black_000\Source\Repos\GeneticKnapsack\GAMultidimKnapsack\3.txt")) { IsBackground = true }.Start();
             Application.Run(form);
 
         }

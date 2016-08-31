@@ -10,11 +10,16 @@ using System.Windows.Forms;
 
 namespace GAMultidimKnapsack
 {
-    public partial class Form1 : Form
+    public partial class EvolutionForm : Form
     {
-        public Form1()
+        public EvolutionForm()
         {
             InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

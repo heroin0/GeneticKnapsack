@@ -9,7 +9,7 @@ namespace GAMultidimKnapsack
 {
     class KnapsackConfig
     {
-        int[] CurrentConfiguration;
+        private int[] CurrentConfiguration;
 
         public KnapsackConfig(int elementsAmount)
         {

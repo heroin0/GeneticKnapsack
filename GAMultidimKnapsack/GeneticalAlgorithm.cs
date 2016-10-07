@@ -31,7 +31,7 @@ namespace GAMultidimKnapsack
             restrictions = rest;
             dimensions = dim;
             itemsSet = new double[itemsAm, dim];
-            rand = new Random(42);
+            rand = new Random();
 
             itemsSet = myItemsSet;
             itemsCosts = costs;
@@ -81,7 +81,7 @@ namespace GAMultidimKnapsack
             }
         }
 
-        public void MakeIteration()
+        public  void MakeIteration()
         {
             if (GetKnapsackCost(configsPool[0]) == maximalKnapsackCost) return;
             List<int> positions = new List<int>();
@@ -90,18 +90,20 @@ namespace GAMultidimKnapsack
                 positions.Add(rand.Next(configsInPoolAmount));
                 positions.Distinct();
             }
-            foreach (var pos in positions)
-            {
-                configsPool[pos] = activeMutation(configsPool[pos], rand);
-            }
+            Parallel.For(0, configsInPoolAmount, pos =>
+           {
+               configsPool[pos] = activeMutation(configsPool[pos], rand);
+           }
+            );
+         
 
 
             KnapsackConfig[] CrossoverPool = new KnapsackConfig[configsInPoolAmount * 2 - 2];//not very well, if i want to customize Crossover ,but works
-            for (var j = 0; j < (configsInPoolAmount - 1); j++)
+            Parallel.For(0, configsInPoolAmount - 1, j =>
             {
                 CrossoverPool[j] = activeCrossover(configsPool[j], configsPool[j + 1], true);
                 CrossoverPool[(CrossoverPool.Length - 1) - j] = activeCrossover(configsPool[j], configsPool[j + 1], false);
-            }
+            });
             var tempConfigs = CrossoverPool.OrderByDescending(config => GetKnapsackCost(config))
                 .Distinct()
                 .Take(Convert.ToInt32(configsInPoolAmount))
@@ -255,7 +257,7 @@ namespace GAMultidimKnapsack
 
         public delegate KnapsackConfig Mutation(KnapsackConfig sack, Random rand);
 
-        public static KnapsackConfig SinglePointMutation(KnapsackConfig sack, Random rand)
+        public  static KnapsackConfig SinglePointMutation(KnapsackConfig sack, Random rand)
         {
             KnapsackConfig mutatedSack = new KnapsackConfig(sack);//copy constructor
             int mutationPosition = rand.Next(itemsAmount);

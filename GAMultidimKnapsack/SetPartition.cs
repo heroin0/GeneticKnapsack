@@ -31,7 +31,7 @@ namespace SetPartition
      class SetPartition
     {
         static Random rand = new Random();
-        static Form form;
+        static MyExperimentalForm form;
         static ConcurrentQueue<double> averageValuations = new ConcurrentQueue<double>();
         static ConcurrentQueue<double> maxValuations = new ConcurrentQueue<double>();
         static ConcurrentQueue<double> ages = new ConcurrentQueue<double>();
@@ -219,8 +219,8 @@ namespace SetPartition
         static void UpdateCharts()
         {
             valuationsChart.AddRange(maxValuations, averageValuations);
-            maxValuations.Clear();
-            averageValuations.Clear();
+            //maxValuations.Clear();
+            //averageValuations.Clear();
         }
 
         /// <summary>
@@ -229,21 +229,22 @@ namespace SetPartition
         [STAThread]
         static void Main()
         {
-            form = new Form();
-            var table = new TableLayoutPanel() { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
-            valuationsChart = new HistoryChart
-            {
-                Lines =
-                {
-                    new HistoryChartValueLine { DataFunction = { Color = Color.Green, BorderWidth=2 }},
-                    new HistoryChartValueLine { DataFunction = { Color = Color.Orange, BorderWidth=2 }},
-                },
-                Max = 1,
-                Dock = DockStyle.Fill
-            };
-            table.Controls.Add(valuationsChart, 0, 0);
-            table.RowStyles.Add(new RowStyle { SizeType = SizeType.Percent, Height = 50 });
-            form.Controls.Add(table);
+            form = new MyExperimentalForm();
+            //var table = new TableLayoutPanel() { Dock = DockStyle.Fill, RowCount = 2, ColumnCount = 1 };
+            //valuationsChart = new HistoryChart
+            //{
+            //    Lines =
+            //    {
+            //        new HistoryChartValueLine { DataFunction = { Color = Color.Green, BorderWidth=2 }},
+            //        new HistoryChartValueLine { DataFunction = { Color = Color.Orange, BorderWidth=2 }},
+            //    },
+            //    Max = 1,
+            //    Dock = DockStyle.Fill
+            //};
+            //table.Controls.Add(valuationsChart, 0, 0);
+            //table.RowStyles.Add(new RowStyle { SizeType = SizeType.Percent, Height = 50 });
+            // form.Controls.Add(table);
+            valuationsChart = form.valuationsChart;
             //new Thread(TestAlgorithm) { IsBackground = true }.Start(); 
             new Thread(() => ProcessTestSet(@"C:\Users\black_000\Source\Repos\GeneticKnapsack\GAMultidimKnapsack\3.txt", @"C:\Users\black_000\Source\Repos\GeneticKnapsack\GAMultidimKnapsack\_res.txt")) { IsBackground = true }.Start();
             Application.Run(form);

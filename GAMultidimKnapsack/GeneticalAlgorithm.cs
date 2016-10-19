@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+//using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GAMultidimKnapsack
@@ -81,7 +81,7 @@ namespace GAMultidimKnapsack
             }
         }
 
-        public  void MakeIteration()
+        public void MakeIteration()
         {
             if (GetKnapsackCost(configsPool[0]) == maximalKnapsackCost) return;
             List<int> positions = new List<int>();
@@ -90,20 +90,16 @@ namespace GAMultidimKnapsack
                 positions.Add(rand.Next(configsInPoolAmount));
                 positions.Distinct();
             }
-            Parallel.For(0, configsInPoolAmount, pos =>
-           {
-               configsPool[pos] = activeMutation(configsPool[pos], rand);
-           }
-            );
-         
-
-
+            for (int i = 0; i < configsInPoolAmount; i++)
+            {
+                configsPool[i] = activeMutation(configsPool[i], rand);
+            }
             KnapsackConfig[] CrossoverPool = new KnapsackConfig[configsInPoolAmount * 2 - 2];//not very well, if i want to customize Crossover ,but works
-            Parallel.For(0, configsInPoolAmount - 1, j =>
+            for(int j=0;j< configsInPoolAmount - 1; j++)
             {
                 CrossoverPool[j] = activeCrossover(configsPool[j], configsPool[j + 1], true);
                 CrossoverPool[(CrossoverPool.Length - 1) - j] = activeCrossover(configsPool[j], configsPool[j + 1], false);
-            });
+            }
             var tempConfigs = CrossoverPool.OrderByDescending(config => GetKnapsackCost(config))
                 .Distinct()
                 .Take(Convert.ToInt32(configsInPoolAmount))
@@ -150,10 +146,10 @@ namespace GAMultidimKnapsack
             int[] crossItems = new int[itemsAmount];
             if (isLeft)
             {
-                for (var i = 0; i < itemsAmount/2; i++)
-                        crossItems[i] = sack2.valueAt(i);
-                for (var i=itemsAmount/2;i<itemsAmount;i++)
-                        crossItems[i] = sack1.valueAt(i);
+                for (var i = 0; i < itemsAmount / 2; i++)
+                    crossItems[i] = sack2.valueAt(i);
+                for (var i = itemsAmount / 2; i < itemsAmount; i++)
+                    crossItems[i] = sack1.valueAt(i);
             }
             else
             {
@@ -162,7 +158,7 @@ namespace GAMultidimKnapsack
                 for (var i = itemsAmount / 2; i < itemsAmount; i++)
                     crossItems[i] = sack2.valueAt(i);
             }
-           
+
             KnapsackConfig CrossoverResult = new KnapsackConfig(crossItems);
             if (!IsValid(CrossoverResult))
                 CrossoverResult = MakeValid(CrossoverResult);
@@ -229,7 +225,7 @@ namespace GAMultidimKnapsack
 
         public static KnapsackConfig TwoPointCrossover(KnapsackConfig sack1, KnapsackConfig sack2, bool isLeft)
         {
-            int firstPoint = rand.Next(itemsAmount-1), secondPoint = rand.Next(firstPoint + 1,itemsAmount);
+            int firstPoint = rand.Next(itemsAmount - 1), secondPoint = rand.Next(firstPoint + 1, itemsAmount);
             int[] crossItems = new int[itemsAmount];
             if (isLeft)
             {
@@ -257,7 +253,7 @@ namespace GAMultidimKnapsack
 
         public delegate KnapsackConfig Mutation(KnapsackConfig sack, Random rand);
 
-        public  static KnapsackConfig SinglePointMutation(KnapsackConfig sack, Random rand)
+        public static KnapsackConfig SinglePointMutation(KnapsackConfig sack, Random rand)
         {
             KnapsackConfig mutatedSack = new KnapsackConfig(sack);//copy constructor
             int mutationPosition = rand.Next(itemsAmount);
@@ -274,7 +270,7 @@ namespace GAMultidimKnapsack
             }
             if (count == 1000000)
             {
-               return MakeValid(mutatedSack);
+                return MakeValid(mutatedSack);
             }
             return mutatedSack;
         }
@@ -348,7 +344,7 @@ namespace GAMultidimKnapsack
 
         public double GetNormaizedAveragePoolCost()
         {
-           return GetAbsoluteAverageKnapsackCost() / maximalKnapsackCost;
+            return GetAbsoluteAverageKnapsackCost() / maximalKnapsackCost;
         }
 
         public double GetAbsoluteMaximalKnapsackCost()
